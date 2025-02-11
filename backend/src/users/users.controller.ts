@@ -19,6 +19,12 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard, AdminGuard)
+  @Get('/all')
+  getAllUsers() {
+    return this.usersService.getAllUsers();
+  } 
+
+  @UseGuards(AccessTokenGuard, AdminGuard)
   @Post('/setAdmin')
   setAdmin(@Body('username') username: string) {
     return this.usersService.setAdmin(username);
@@ -26,7 +32,30 @@ export class UsersController {
 
   @UseGuards(AccessTokenGuard, AdminGuard)
   @Post('/setArtist')
-  setArtist(@Body('username') username: string) {
-    return this.usersService.setArtist(username);
+  setArtist(
+    @Body('username') username: string,
+    @Body('artistName') artistName: string,
+    ) {
+    return this.usersService.setArtist(username, artistName);
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Post('/sendArtistRequest')
+  sendArtistRequest(@Req() req: Request & { user: any }, @Body('name') name: string) {
+    const userId = req.user['userId'];
+    return this.usersService.sendArtistRequest(userId, name);
+  }
+
+  @UseGuards(AccessTokenGuard, AdminGuard)
+  @Get('/artistRequests')
+  getArtistRequests(@Body('userId') userId: string) {
+    return this.usersService.getArtistRequests(userId);
+  }
+
+  @UseGuards(AccessTokenGuard, AdminGuard)
+  @Post('/handleArtistRequest')
+  handleArtistRequest(@Body('requestId') requestId: string, @Body('status') status: string) {
+    return this.usersService.handleArtistRequest(requestId, status);
+  }
+
 }

@@ -18,28 +18,38 @@ enum AlbumType {
   ALBUM
 }
 
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
-  id       String  @id @default(uuid())
-  username String  @unique
-  email    String  @unique
-  password String
-  isArtist Boolean @default(false)
-  isAdmin  Boolean @default(false)
-  Artist   Artist?
+  id                String              @id @default(uuid())
+  username          String              @unique
+  email             String              @unique
+  password          String
+  isArtist          Boolean             @default(false)
+  isAdmin           Boolean             @default(false)
+  Artist            Artist?
+  artistRoleRequest ArtistRoleRequest[]
+  AlbumRequest      AlbumRequest[]
 }
 
 model Artist {
-  id     String  @id @default(uuid())
-  name   String
-  userId String  @unique
-  user   User    @relation(fields: [userId], references: [id])
-  tracks Track[]
-  albums Album[]
+  id                String              @id @default(uuid())
+  name              String
+  userId            String              @unique
+  user              User                @relation(fields: [userId], references: [id])
+  tracks            Track[]
+  albums            Album[]
+  AlbumRequest      AlbumRequest[]
 }
 
 model Track {
   id       String         @id @default(uuid())
   title    String
+  audio    String
   artistId String
   artist   Artist         @relation(fields: [artistId], references: [id])
   albums   TrackOnAlbum[]
@@ -56,10 +66,36 @@ model Album {
 }
 
 model TrackOnAlbum {
-  albumId String
-  trackId String
-  album   Album  @relation(fields: [albumId], references: [id])
-  track   Track  @relation(fields: [trackId], references: [id])
+  albumId        String
+  trackId        String
+  album          Album         @relation(fields: [albumId], references: [id])
+  track          Track         @relation(fields: [trackId], references: [id])
+  AlbumRequest   AlbumRequest? @relation(fields: [albumRequestId], references: [id])
+  albumRequestId String?
 
   @@id([albumId, trackId])
+}
+
+model ArtistRoleRequest {
+  id        String        @id @default(uuid())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  name      String
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+}
+
+model AlbumRequest {
+  id          String         @id @default(uuid())
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String
+  status      RequestStatus  @default(PENDING)
+  createdAt   DateTime       @default(now())
+  type        AlbumType
+  title       String
+  artistId    String
+  artist      Artist         @relation(fields: [artistId], references: [id])
+  releaseDate DateTime
+  tracks      TrackOnAlbum[]
+  logo        String?
 }
