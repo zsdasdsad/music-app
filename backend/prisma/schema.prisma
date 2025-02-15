@@ -33,7 +33,6 @@ model User {
   isAdmin           Boolean             @default(false)
   Artist            Artist?
   artistRoleRequest ArtistRoleRequest[]
-  AlbumRequest      AlbumRequest[]
 }
 
 model Artist {
@@ -43,7 +42,6 @@ model Artist {
   user              User                @relation(fields: [userId], references: [id])
   tracks            Track[]
   albums            Album[]
-  AlbumRequest      AlbumRequest[]
 }
 
 model Track {
@@ -63,17 +61,17 @@ model Album {
   tracks      TrackOnAlbum[]
   releaseDate DateTime
   type        AlbumType
+  logo        String?
+  status      RequestStatus  @default(PENDING)
 }
 
 model TrackOnAlbum {
-  albumId        String
-  trackId        String
-  album          Album         @relation(fields: [albumId], references: [id])
-  track          Track         @relation(fields: [trackId], references: [id])
-  AlbumRequest   AlbumRequest? @relation(fields: [albumRequestId], references: [id])
-  albumRequestId String?
-
-  @@id([albumId, trackId])
+  id            String         @id @default(uuid())
+  albumId       String?
+  trackId       String
+  album         Album?         @relation(fields: [albumId], references: [id])
+  track         Track          @relation(fields: [trackId], references: [id])
+  order         Int
 }
 
 model ArtistRoleRequest {
@@ -83,19 +81,4 @@ model ArtistRoleRequest {
   name      String
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
-}
-
-model AlbumRequest {
-  id          String         @id @default(uuid())
-  user        User           @relation(fields: [userId], references: [id])
-  userId      String
-  status      RequestStatus  @default(PENDING)
-  createdAt   DateTime       @default(now())
-  type        AlbumType
-  title       String
-  artistId    String
-  artist      Artist         @relation(fields: [artistId], references: [id])
-  releaseDate DateTime
-  tracks      TrackOnAlbum[]
-  logo        String?
 }

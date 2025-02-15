@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Multer } from 'multer';
+import { AlbumType } from '@prisma/client';
 
 @Injectable()
 export class ContentService {
@@ -38,4 +39,57 @@ export class ContentService {
       },
     });
   }
+
+  async sendAlbumRequest(artistId: string, title: string, releaseDate: Date, type: AlbumType, logo: string, tracks: {trackId: string, order: number}[]) {
+       return this.prisma.$transaction(async (prisma) => {
+         const album = await prisma.album.create({
+           data: {
+             title,
+             releaseDate,
+             type,
+             logo,
+             artist: {
+               connect: { id: artistId },
+             },
+           },
+         });
+
+         const trackOnAlbumData = tracks.map(track => ({
+           albumId: album.id,
+           trackId: track.trackId,
+           order: track.order,
+         }));
+
+         await prisma.trackOnAlbum.createMany({
+           data: trackOnAlbumData,
+           skipDuplicates: true,
+         });
+
+         return album;
+  });
+}
+
+async getAlbumRequests() {
+  return this.prisma.albumRequest.findMany({
+    include: {
+      artist: true,
+    },
+  });
+}
+
+async getAlbums() {
+  return this.prisma.album.findMany({
+    include: {
+      artist: true,
+      tracks: true,
+    },
+  });
+}
+
+async getArtistTracks(artistId: string) {
+  return this.prisma.track.findMany({
+    where: { artistId },
+  });
+}
+
 }
