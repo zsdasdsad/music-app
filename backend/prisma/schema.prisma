@@ -33,6 +33,8 @@ model User {
   isAdmin           Boolean             @default(false)
   Artist            Artist?
   artistRoleRequest ArtistRoleRequest[]
+  likedTracks       Track[]             @relation("LikedTracks")
+  likedAlbums       Album[]             @relation("LikedAlbums")
 }
 
 model Artist {
@@ -51,6 +53,7 @@ model Track {
   artistId String
   artist   Artist         @relation(fields: [artistId], references: [id])
   albums   TrackOnAlbum[]
+  likedBy  User[]         @relation("LikedTracks")
 }
 
 model Album {
@@ -63,6 +66,7 @@ model Album {
   type        AlbumType
   logo        String?
   status      RequestStatus  @default(PENDING)
+  likedBy     User[]         @relation("LikedAlbums")
 }
 
 model TrackOnAlbum {

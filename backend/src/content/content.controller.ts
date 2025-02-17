@@ -52,18 +52,6 @@ export class ContentController {
     }
 
     @UseGuards(AccessTokenGuard, ArtistGuard)
-    @Get('albumRequests')
-    async getAlbumRequests() {
-        return this.contentService.getAlbumRequests();
-    }
-
-    @UseGuards(AccessTokenGuard, ArtistGuard)
-    @Get('albums')
-    async getAlbums() {
-        return this.contentService.getAlbums();
-    }
-
-    @UseGuards(AccessTokenGuard, ArtistGuard)
     @Get('artistTracks')
     async getArtistTracks(@Req() req: Request & { user: any }) {
         const user = await this.prisma.user.findUnique({
@@ -76,5 +64,33 @@ export class ContentController {
         }
 
         return this.contentService.getArtistTracks(user.Artist.id);
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Post('likeTrack')
+    async likeTrack(@Req() req: Request & { user: any }, @Body('trackId') trackId: string) {
+        const user = req.user['userId'];
+        return this.contentService.likeTrack(user, trackId);
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Post('likeAlbum')
+    async likeAlbum(@Req() req: Request & { user: any }, @Body('albumId') albumId: string) {
+        const user = req.user['userId'];
+        return this.contentService.likeAlbum(user, albumId);
+    }
+    
+    @UseGuards(AccessTokenGuard)
+    @Get('likedTracks')
+    async getLikedTracks(@Req() req: Request & { user: any }) {
+        const user = req.user['userId'];
+        return this.contentService.getLikedTracks(user);
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Get('likedAlbums')
+    async getLikedAlbums(@Req() req: Request & { user: any }) {
+        const user = req.user['userId'];
+        return this.contentService.getLikedAlbums(user);
     }
 }

@@ -69,14 +69,6 @@ export class ContentService {
   });
 }
 
-async getAlbumRequests() {
-  return this.prisma.albumRequest.findMany({
-    include: {
-      artist: true,
-    },
-  });
-}
-
 async getAlbums() {
   return this.prisma.album.findMany({
     include: {
@@ -92,4 +84,39 @@ async getArtistTracks(artistId: string) {
   });
 }
 
+async likeTrack(userId: string, trackId: string) {
+  return this.prisma.user.update({
+    where: { id: userId },
+    data: {
+      likedTracks: {
+        connect: [{ id: trackId }]
+      }
+    },
+  });
+}
+
+async likeAlbum(userId: string, albumId: string) {
+  return this.prisma.user.update({
+    where: { id: userId },
+    data: {
+      likedAlbums: {
+        connect: [{ id: albumId }]
+      }
+    },
+  });
+}
+
+async getLikedTracks(userId: string) {
+  return this.prisma.user.findUnique({
+    where: { id: userId },
+    include: { likedTracks: true },
+  });
+}
+
+async getLikedAlbums(userId: string) {
+  return this.prisma.user.findUnique({
+    where: { id: userId },
+    include: { likedAlbums: true },
+  });
+}
 }
